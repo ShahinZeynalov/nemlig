@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  broker:
+    image: rabbitmq:3
+    env_file:
+      - .env
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  # worker:
+  #   build:
+  #     context: . 
+  #     dockerfile:  celery.dockerfile
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   command: celery -A tasks worker --loglevel=INFO --autoscale=10,3
+  #   links:
+  #     - broker
+  #   volumes:
+  #     - ./app:/app
+  #     - ./media:/code/media
+  #   depends_on:
+  #     - broker
+
+  flower:
+    image: zoomeranalytics/flower:0.9.1-4.0.2
+    restart: always
+    command: ["flower", "--broker=amqp://guest:guest@broker:5672//", "--port=5555"] 
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - broker
+      # - worker
